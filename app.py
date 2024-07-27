@@ -29,55 +29,61 @@ def generate_pdf():
     nome_profissional = data.get('nome_profissional')
     assinatura_profissional = data.get('assinatura_profissional')
 
-    # Leitura do PDF original
+    # Definir as posições dos campos no PDF
+    texts_positions = {
+        "HOSPITAL DR. JOSÉ PEDRO BEZERRA": (70, 765),  # Campo 1
+        "HOSPITAL DR. JOSÉ PEDRO BEZERRA": (70, 750),  # Campo 3
+        datetime.now().strftime("%d/%m/%Y"): (445, 753),  # Campo 34
+        nome_paciente: (135, 662),  # Campo 5
+        numero_prontuario: (500, 662),  # Campo 6
+        nome_mae: (135, 645),  # Campo 11
+        municipio_residencia: (135, 627),  # Campo 16
+        sinais_sintomas: (135, 579),  # Campo 20
+        condicoes_justificam: (135, 562),  # Campo 21
+        resultados_provas: (135, 545),  # Campo 22
+        diagnostico_inicial: (135, 528),  # Campo 23
+        cid10_principal: (135, 511),  # Campo 24
+        descricao_procedimento: (135, 450),  # Campo 27
+        carater_internacao: (135, 400),  # Campo 30
+        nome_profissional: (135, 315),  # Campo 33
+        assinatura_profissional: (445, 315)  # Campo 35
+    }
+
+    # Criar o PDF com os textos adicionados
     input_pdf_path = "static/aih_laudo_internacao.pdf"
-    pdf_reader = PdfReader(input_pdf_path)
-    pdf_writer = PdfWriter()
+    output_pdf_path = "static/aih_laudo_internacao_filled.pdf"
 
-    # Selecionar a primeira página do PDF
-    page = pdf_reader.pages[0]
-    pdf_writer.add_page(page)
+    add_text_to_pdf(input_pdf_path, output_pdf_path, texts_positions)
 
-    # Criar um buffer para o novo PDF
+    # Enviar o PDF preenchido para o usuário
+    return send_file(output_pdf_path, as_attachment=True, download_name='laudo_preenchido.pdf', mimetype='application/pdf')
+
+def add_text_to_pdf(input_pdf_path, output_pdf_path, texts_positions, font_size=10):
+    # Criar um PDF temporário com o texto
     packet = io.BytesIO()
     can = canvas.Canvas(packet, pagesize=letter)
-
-    # Adicionar texto ao PDF
-    can.drawString(70, 765, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 1
-    can.drawString(70, 750, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 3
-    can.drawString(445, 753, datetime.now().strftime("%d/%m/%Y"))  # Campo 34
-
-    can.drawString(135, 662, nome_paciente)  # Campo 5
-    can.drawString(500, 662, numero_prontuario)  # Campo 6
-    can.drawString(135, 645, nome_mae)  # Campo 11
-    can.drawString(135, 627, municipio_residencia)  # Campo 16
-    can.drawString(135, 579, sinais_sintomas)  # Campo 20
-    can.drawString(135, 562, condicoes_justificam)  # Campo 21
-    can.drawString(135, 545, resultados_provas)  # Campo 22
-    can.drawString(135, 528, diagnostico_inicial)  # Campo 23
-    can.drawString(135, 511, cid10_principal)  # Campo 24
-    can.drawString(135, 450, descricao_procedimento)  # Campo 27
-    can.drawString(135, 400, carater_internacao)  # Campo 30
-    can.drawString(135, 315, nome_profissional)  # Campo 33
-    can.drawString(445, 315, assinatura_profissional)  # Campo 35
-
+    can.setFont("Helvetica", font_size)
+    for text, (x, y) in texts_positions.items():
+        can.drawString(x, y, text)
     can.save()
+    
+    # Ler o PDF original e o PDF temporário
+    existing_pdf = PdfReader(input_pdf_path)
+    temp_pdf = PdfReader(packet)
+    output = PdfWriter()
 
-    # Mover o buffer para o início
-    packet.seek(0)
-    new_pdf = PdfReader(packet)
-    new_page = new_pdf.pages[0]
+    # Adicionar o texto à primeira página do PDF original
+    page = existing_pdf.pages[0]
+    page.merge_page(temp_pdf.pages[0])
+    output.add_page(page)
 
-    # Mesclar a nova página com o PDF original
-    page.merge_page(new_page)
+    # Adicionar as páginas restantes
+    for i in range(1, len(existing_pdf.pages)):
+        output.add_page(existing_pdf.pages[i])
 
-    # Escrever o PDF preenchido em um buffer
-    pdf_buffer = io.BytesIO()
-    pdf_writer.add_page(page)
-    pdf_writer.write(pdf_buffer)
-    pdf_buffer.seek(0)
-
-    return send_file(pdf_buffer, as_attachment=True, download_name='laudo_preenchido.pdf', mimetype='application/pdf')
+    # Escrever o PDF preenchido no arquivo de saída
+    with open(output_pdf_path, "wb") as outputStream:
+        output.write(outputStream)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=10000)
