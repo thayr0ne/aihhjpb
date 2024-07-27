@@ -36,8 +36,6 @@ def generate_pdf():
 
     # Selecionar a primeira página do PDF
     page = pdf_reader.pages[0]
-
-    # Adicionar a página ao escritor de PDF
     pdf_writer.add_page(page)
 
     # Criar um buffer para o novo PDF
@@ -45,23 +43,23 @@ def generate_pdf():
     can = canvas.Canvas(packet, pagesize=letter)
 
     # Adicionar texto ao PDF
-    can.drawString(100, 800, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 1
-    can.drawString(100, 780, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 3
-    can.drawString(100, 760, datetime.now().strftime("%d/%m/%Y"))  # Campo 34
+    can.drawString(70, 765, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 1
+    can.drawString(70, 750, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 3
+    can.drawString(445, 753, datetime.now().strftime("%d/%m/%Y"))  # Campo 34
 
-    can.drawString(100, 740, nome_paciente)  # Campo 5
-    can.drawString(100, 720, numero_prontuario)  # Campo 6
-    can.drawString(100, 700, nome_mae)  # Campo 11
-    can.drawString(100, 680, municipio_residencia)  # Campo 16
-    can.drawString(100, 660, sinais_sintomas)  # Campo 20
-    can.drawString(100, 640, condicoes_justificam)  # Campo 21
-    can.drawString(100, 620, resultados_provas)  # Campo 22
-    can.drawString(100, 600, diagnostico_inicial)  # Campo 23
-    can.drawString(100, 580, cid10_principal)  # Campo 24
-    can.drawString(100, 560, descricao_procedimento)  # Campo 27
-    can.drawString(100, 540, carater_internacao)  # Campo 30
-    can.drawString(100, 520, nome_profissional)  # Campo 33
-    can.drawString(100, 500, assinatura_profissional)  # Campo 35
+    can.drawString(135, 662, nome_paciente)  # Campo 5
+    can.drawString(500, 662, numero_prontuario)  # Campo 6
+    can.drawString(135, 645, nome_mae)  # Campo 11
+    can.drawString(135, 627, municipio_residencia)  # Campo 16
+    can.drawString(135, 579, sinais_sintomas)  # Campo 20
+    can.drawString(135, 562, condicoes_justificam)  # Campo 21
+    can.drawString(135, 545, resultados_provas)  # Campo 22
+    can.drawString(135, 528, diagnostico_inicial)  # Campo 23
+    can.drawString(135, 511, cid10_principal)  # Campo 24
+    can.drawString(135, 450, descricao_procedimento)  # Campo 27
+    can.drawString(135, 400, carater_internacao)  # Campo 30
+    can.drawString(135, 315, nome_profissional)  # Campo 33
+    can.drawString(445, 315, assinatura_profissional)  # Campo 35
 
     can.save()
 
@@ -72,10 +70,10 @@ def generate_pdf():
 
     # Mesclar a nova página com o PDF original
     page.merge_page(new_page)
-    pdf_writer.add_page(page)
 
     # Escrever o PDF preenchido em um buffer
     pdf_buffer = io.BytesIO()
+    pdf_writer.add_page(page)
     pdf_writer.write(pdf_buffer)
     pdf_buffer.seek(0)
 
