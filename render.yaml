@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: laudo-internacao
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: ""
+    startCommand: "python app.py"
