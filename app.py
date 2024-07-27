@@ -68,6 +68,7 @@ def add_text_to_pdf(input_pdf_path, output_pdf_path, texts_positions, font_size=
     can.save()
     
     # Ler o PDF original e o PDF temporário
+    packet.seek(0)
     existing_pdf = PdfReader(input_pdf_path)
     temp_pdf = PdfReader(packet)
     output = PdfWriter()
