@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário de Internação</title>
+</head>
+<body>
+    <h1>Formulário de Internação</h1>
+    <form action="/generate_pdf" method="POST">
+        <label for="nome_paciente">Nome do Paciente:</label>
+        <input type="text" id="nome_paciente" name="nome_paciente" required><br><br>
+
+        <label for="numero_prontuario">Número do Prontuário:</label>
+        <input type="text" id="numero_prontuario" name="numero_prontuario" required><br><br>
+
+        <label for="nome_mae">Nome da Mãe:</label>
+        <input type="text" id="nome_mae" name="nome_mae" required><br><br>
+
+        <label for="municipio_residencia">Município de Residência:</label>
+        <input type="text" id="municipio_residencia" name="municipio_residencia" required><br><br>
+
+        <label for="sinais_sintomas">Principais Sinais e Sintomas Clínicos:</label>
+        <textarea id="sinais_sintomas" name="sinais_sintomas" required></textarea><br><br>
+
+        <label for="condicoes_justificam">Condições que Justificam a Internação:</label>
+        <textarea id="condicoes_justificam" name="condicoes_justificam" required></textarea><br><br>
+
+        <label for="resultados_provas">Principais Resultados de Provas Diagnósticas:</label>
+        <textarea id="resultados_provas" name="resultados_provas" required></textarea><br><br>
+
+        <label for="diagnostico_inicial">Diagnóstico Inicial:</label>
+        <input type="text" id="diagnostico_inicial" name="diagnostico_inicial" required><br><br>
+
+        <label for="cid10_principal">CID 10 Principal:</label>
+        <input type="text" id="cid10_principal" name="cid10_principal" required><br><br>
+
+        <label for="descricao_procedimento">Descrição do Procedimento Solicitado:</label>
+        <select id="descricao_procedimento" name="descricao_procedimento" required>
+            <option value="Internação hospitalar">Internação hospitalar</option>
+        </select><br><br>
+
+        <label for="carater_internacao">Caráter da Internação:</label>
+        <select id="carater_internacao" name="carater_internacao" required>
+            <option value="Eletivo">Eletivo</option>
+            <option value="Urgente">Urgente</option>
+        </select><br><br>
+
+        <label for="nome_profissional">Nome do Profissional:</label>
+        <input type="text" id="nome_profissional" name="nome_profissional" required><br><br>
+
+        <label for="assinatura_profissional">Assinatura e Carimbo do Profissional:</label>
+        <input type="text" id="assinatura_profissional" name="assinatura_profissional" required><br><br>
+
+        <input type="submit" value="Gerar PDF">
+    </form>
+</body>
+</html>
