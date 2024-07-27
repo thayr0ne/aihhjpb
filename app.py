@@ -29,7 +29,7 @@ def generate_pdf():
     assinatura_profissional = data.get('assinatura_profissional')
 
     # Leitura do PDF original
-    input_pdf_path = "/mnt/data/aih_laudo_internacao.pdf"
+    input_pdf_path = "static/aih_laudo_internacao.pdf"
     pdf_reader = PdfReader(input_pdf_path)
     pdf_writer = PdfWriter()
 
