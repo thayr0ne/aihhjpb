@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, send_file
 from PyPDF2 import PdfReader, PdfWriter
-from PyPDF2.generic import NameObject, TextStringObject
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from datetime import datetime
 import io
 
@@ -36,36 +37,41 @@ def generate_pdf():
     # Selecionar a primeira página do PDF
     page = pdf_reader.pages[0]
 
-    # Criar um dicionário com os campos preenchidos
-    fields = {
-        "1": "HOSPITAL DR. JOSÉ PEDRO BEZERRA",
-        "3": "HOSPITAL DR. JOSÉ PEDRO BEZERRA",
-        "5": nome_paciente,
-        "6": numero_prontuario,
-        "11": nome_mae,
-        "16": municipio_residencia,
-        "20": sinais_sintomas,
-        "21": condicoes_justificam,
-        "22": resultados_provas,
-        "23": diagnostico_inicial,
-        "24": cid10_principal,
-        "27": descricao_procedimento,
-        "30": carater_internacao,
-        "33": nome_profissional,
-        "34": datetime.now().strftime("%d/%m/%Y"),
-        "35": assinatura_profissional
-    }
+    # Adicionar a página ao escritor de PDF
+    pdf_writer.add_page(page)
 
-    # Preencher os campos do PDF
-    for field_key, field_value in fields.items():
-        for j in range(0, len(page['/Annots'])):
-            field = page['/Annots'][j].getObject()
-            if field.get('/T') == field_key:
-                field.update({
-                    NameObject("/V"): TextStringObject(field_value)
-                })
+    # Criar um buffer para o novo PDF
+    packet = io.BytesIO()
+    can = canvas.Canvas(packet, pagesize=letter)
 
-    # Adicionar a página preenchida ao escritor de PDF
+    # Adicionar texto ao PDF
+    can.drawString(100, 800, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 1
+    can.drawString(100, 780, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")  # Campo 3
+    can.drawString(100, 760, datetime.now().strftime("%d/%m/%Y"))  # Campo 34
+
+    can.drawString(100, 740, nome_paciente)  # Campo 5
+    can.drawString(100, 720, numero_prontuario)  # Campo 6
+    can.drawString(100, 700, nome_mae)  # Campo 11
+    can.drawString(100, 680, municipio_residencia)  # Campo 16
+    can.drawString(100, 660, sinais_sintomas)  # Campo 20
+    can.drawString(100, 640, condicoes_justificam)  # Campo 21
+    can.drawString(100, 620, resultados_provas)  # Campo 22
+    can.drawString(100, 600, diagnostico_inicial)  # Campo 23
+    can.drawString(100, 580, cid10_principal)  # Campo 24
+    can.drawString(100, 560, descricao_procedimento)  # Campo 27
+    can.drawString(100, 540, carater_internacao)  # Campo 30
+    can.drawString(100, 520, nome_profissional)  # Campo 33
+    can.drawString(100, 500, assinatura_profissional)  # Campo 35
+
+    can.save()
+
+    # Mover o buffer para o início
+    packet.seek(0)
+    new_pdf = PdfReader(packet)
+    new_page = new_pdf.pages[0]
+
+    # Mesclar a nova página com o PDF original
+    page.merge_page(new_page)
     pdf_writer.add_page(page)
 
     # Escrever o PDF preenchido em um buffer
