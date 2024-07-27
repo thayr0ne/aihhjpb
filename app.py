@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, send_file
-from reportlab.pdfgen import canvas
+from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.generic import NameObject, TextStringObject
 from datetime import datetime
 import io
 
@@ -26,36 +27,53 @@ def generate_pdf():
     carater_internacao = data.get('carater_internacao')
     nome_profissional = data.get('nome_profissional')
     assinatura_profissional = data.get('assinatura_profissional')
-    
-    # Gerando o PDF
+
+    # Leitura do PDF original
+    input_pdf_path = "/mnt/data/aih_laudo_internacao.pdf"
+    pdf_reader = PdfReader(input_pdf_path)
+    pdf_writer = PdfWriter()
+
+    # Selecionar a primeira página do PDF
+    page = pdf_reader.pages[0]
+
+    # Criar um dicionário com os campos preenchidos
+    fields = {
+        "1": "HOSPITAL DR. JOSÉ PEDRO BEZERRA",
+        "3": "HOSPITAL DR. JOSÉ PEDRO BEZERRA",
+        "5": nome_paciente,
+        "6": numero_prontuario,
+        "11": nome_mae,
+        "16": municipio_residencia,
+        "20": sinais_sintomas,
+        "21": condicoes_justificam,
+        "22": resultados_provas,
+        "23": diagnostico_inicial,
+        "24": cid10_principal,
+        "27": descricao_procedimento,
+        "30": carater_internacao,
+        "33": nome_profissional,
+        "34": datetime.now().strftime("%d/%m/%Y"),
+        "35": assinatura_profissional
+    }
+
+    # Preencher os campos do PDF
+    for field_key, field_value in fields.items():
+        for j in range(0, len(page['/Annots'])):
+            field = page['/Annots'][j].getObject()
+            if field.get('/T') == field_key:
+                field.update({
+                    NameObject("/V"): TextStringObject(field_value)
+                })
+
+    # Adicionar a página preenchida ao escritor de PDF
+    pdf_writer.add_page(page)
+
+    # Escrever o PDF preenchido em um buffer
     pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer)
-    
-    # Campos automáticos
-    c.drawString(50, 800, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")
-    c.drawString(50, 780, "HOSPITAL DR. JOSÉ PEDRO BEZERRA")
-    c.drawString(50, 760, datetime.now().strftime("%d/%m/%Y"))
-    
-    # Campos do formulário
-    c.drawString(50, 740, nome_paciente)
-    c.drawString(50, 720, numero_prontuario)
-    c.drawString(50, 700, nome_mae)
-    c.drawString(50, 680, municipio_residencia)
-    c.drawString(50, 660, sinais_sintomas)
-    c.drawString(50, 640, condicoes_justificam)
-    c.drawString(50, 620, resultados_provas)
-    c.drawString(50, 600, diagnostico_inicial)
-    c.drawString(50, 580, cid10_principal)
-    c.drawString(50, 560, descricao_procedimento)
-    c.drawString(50, 540, carater_internacao)
-    c.drawString(50, 520, nome_profissional)
-    c.drawString(50, 500, assinatura_profissional)
-    
-    c.showPage()
-    c.save()
-    
+    pdf_writer.write(pdf_buffer)
     pdf_buffer.seek(0)
+
     return send_file(pdf_buffer, as_attachment=True, download_name='laudo_preenchido.pdf', mimetype='application/pdf')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=10000)
